@@ -108,10 +108,6 @@ async function astar(maze, start, end) {
             }
         }
 
-        // draw();
-        // drawSquare(curNode.position,"#fff");
-        // await sleep(delay);
-
         // pop cur off open list, add to closed list
         openList.splice(curIndex,1);
         closedList.push(curNode);
@@ -133,10 +129,8 @@ async function astar(maze, start, end) {
         // generate children
         var children = [];
         for(var i = 0; i < positions.length; i++){
-            // console.log("gen children: "+positions[i]);
             // new node position
             nodePos = [curNode.position[0]+positions[i][0], curNode.position[1]+positions[i][1]];
-            // console.log(nodePos);
 
             // make sure within range
             if(nodePos[1] > maze.length - 1||nodePos[1]<0|| nodePos[0]>maze[0].length-1 || nodePos[0]<0){
@@ -242,18 +236,6 @@ function cursorDraw(){
     cx.fillRect(curPos[0] * size, curPos[1] * size, size, size);
     cx.stroke();
     posRecs.push(curPos);
-
-    // // clear previous
-    // cx.fillStyle = C_FORE;
-    // cx.strokeStyle = C_FORE_DIM;
-    // if(curPos_prev[0] != -1 && maze[curPos_prev[0]][curPos_prev[1]]){
-    //     cx.fillRect(curPos_prev[0] * size, curPos_prev[1] * size, size, size);
-    // } else {
-    //     cx.rect(curPos_prev[0] * size, curPos_prev[1] * size, size, size);
-    // }
-    // cx.stroke();
-    
-    // curPos_prev = curPos;
 }
 
 function drawSquare(pos, colour){
