@@ -32,8 +32,6 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-//https://gist.github.com/Nicholas-Swift/003e1932ef2804bebef2710527008f44#file-astar-py
-
 // colours
 const C_BACKG = '#222';
 const C_FORE = '#ccc';
@@ -42,7 +40,11 @@ const C_FORE_DIM = '#666';
 var size = 40;
 var delay = 5; // delay in ms
 
-var downPos = null;
+var downPos = [-1, -1];
+var curPos = [-1, -1];
+var upPos = [-1, -1];
+
+var posRecs = [];
 
 var c = document.getElementById('c'),
     cx = c.getContext('2d');
@@ -191,23 +193,67 @@ async function astar(maze, start, end) {
 }
 
 function drawMaze(maze) {
-    //implement this, Manas //nvm lol
     cx.fillStyle = C_FORE;
     cx.strokeStyle = C_FORE_DIM;
 
     for (var col = 0; col < maze.length; col++) {
         for (var row = 0; row < maze[col].length; row++) {
-            if (maze[col][row]) {
-                // cx.beginPath();
-                cx.fillRect(row * size, col * size, size, size);
-                cx.stroke();
-            } else {
-                // cx.beginPath();
-                cx.rect(row * size, col * size, size, size);
-                cx.stroke();
-            }
+            // if(row == curPos[0] && col == curPos[1]){
+                // cx.fillStyle = "#fff";
+                // cx.fillRect(row * size, col * size, size, size);
+                // cx.fillStyle = C_FORE;
+            // } else {
+                if (maze[col][row]) {
+                    cx.fillRect(row * size, col * size, size, size);
+                } else {
+                    cx.rect(row * size, col * size, size, size);
+                }
+            // }
+            cx.stroke();
         }
     }
+}
+
+function cursorDraw(){
+    // clear recs
+    for(var i = posRecs.length-1; i >= 0; i--){
+        cx.fillStyle = C_FORE;
+        cx.strokeStyle = C_FORE_DIM;
+
+        sq = posRecs.pop();
+        col = sq[1];
+        row = sq[0];
+
+        if (col != -1){
+            if (maze[col][row]) {
+                cx.fillStyle = C_FORE;
+                cx.fillRect(row * size, col * size, size, size);
+            } else {
+                cx.fillStyle = C_BACKG;
+                cx.fillRect(row * size, col * size, size, size);
+                cx.rect(row * size, col * size, size, size);
+            }
+            cx.stroke();
+        }
+    }
+
+    // draw current
+    cx.fillStyle = '#80808069';
+    cx.fillRect(curPos[0] * size, curPos[1] * size, size, size);
+    cx.stroke();
+    posRecs.push(curPos);
+
+    // // clear previous
+    // cx.fillStyle = C_FORE;
+    // cx.strokeStyle = C_FORE_DIM;
+    // if(curPos_prev[0] != -1 && maze[curPos_prev[0]][curPos_prev[1]]){
+    //     cx.fillRect(curPos_prev[0] * size, curPos_prev[1] * size, size, size);
+    // } else {
+    //     cx.rect(curPos_prev[0] * size, curPos_prev[1] * size, size, size);
+    // }
+    // cx.stroke();
+    
+    // curPos_prev = curPos;
 }
 
 function drawSquare(pos, colour){
@@ -279,18 +325,17 @@ function random(){
     resizeCanvas();
 
     window.addEventListener('mousedown',function(e){
-        // console.log(e);
-        downPos = [Math.round(e.clientX/size),Math.round(e.clientY/size)];
+        downPos = [Math.floor(e.clientX/size),Math.floor(e.clientY/size)];
     });
     c.addEventListener('mousemove',function(e){
-        curPos = [Math.round((e.clientX-size)/size),Math.round((e.clientY-size)/size)];
-        // draw();
-        drawSquare(curPos,"#a7a7a7bd");
+        pos = [Math.floor(e.clientX/size),Math.floor(e.clientY/size)];
+        if(!maze[pos[1]][pos[0]]){
+            curPos = pos;
+        }
     });
     window.addEventListener('mouseup',function(e){
-        // console.log(e);
-        if(downPos != null){
-            curPos = [Math.round(e.clientX/size),Math.round(e.clientY/size)];
+        if(downPos[0] != -1){
+            upPos = curPos;
             astar(maze,downPos,curPos);
         }
     });
@@ -300,5 +345,9 @@ function random(){
         initMaze(c.width/size,c.height/size);
         random();
         draw();
+
+        setInterval(function(){
+            cursorDraw();
+        }, 10);
     }
 })();
